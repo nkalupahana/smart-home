@@ -1,6 +1,7 @@
 from enum import Enum
 from flask import Flask
 from time import sleep
+import json
 from threading import Lock
 import RPi.GPIO as GPIO
 
@@ -22,7 +23,7 @@ def index():
 
 # State from HomeKit is 0 - 100
 @app.route("/set/<int:desired_state>")
-def status(desired_state):
+def move_curtains(desired_state):
     with lock:
         state = get_state()
         delta = desired_state - state
@@ -32,6 +33,12 @@ def status(desired_state):
         set_state(desired_state)
     
     return "OK"
+
+@app.route("/status")
+def status():
+    return json.dumps({"position": get_state()})
+
+###
 
 def get_state():
     try:
