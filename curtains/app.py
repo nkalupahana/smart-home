@@ -12,8 +12,6 @@ GPIO.setup(3, GPIO.OUT)
 GPIO.output(2, GPIO.HIGH)
 GPIO.output(3, GPIO.HIGH)
 
-HOMEKIT_TO_TIME_MULTIPLIER = 0.1
-
 app = Flask(__name__)
 lock = Lock()
 
@@ -28,7 +26,7 @@ def move_curtains(desired_state):
         state = get_state()
         delta = desired_state - state
         start_moving(delta)
-        sleep(abs(delta) * HOMEKIT_TO_TIME_MULTIPLIER)
+        sleep(calculate_sleep(delta))
         stop_moving()
         set_state(desired_state)
     
@@ -64,3 +62,13 @@ def start_moving(delta):
 def stop_moving():
     GPIO.output(2, GPIO.HIGH)
     GPIO.output(3, GPIO.HIGH)
+
+HOMEKIT_TO_TIME_MULTIPLIER = 0.2
+def calculate_sleep(delta):
+    ret = abs(delta) * HOMEKIT_TO_TIME_MULTIPLIER
+    # If we're going down, we need to sleep
+    # a little less
+    if delta < 0:
+        ret -= 0.25
+
+    return ret
