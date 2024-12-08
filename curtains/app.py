@@ -1,6 +1,6 @@
 from enum import Enum
 from flask import Flask
-from time import sleep
+from time import sleep, time
 import json
 from threading import Lock
 import RPi.GPIO as GPIO
@@ -26,7 +26,14 @@ def move_curtains(desired_state):
         state = get_state()
         delta = desired_state - state
         start_moving(delta)
-        sleep(calculate_sleep(delta))
+        sleep_delta = calculate_sleep(delta)
+        end_time = time() + sleep_delta
+        current_state = state
+        while time() < end_time:
+            sleep(0.1)
+            current_state += delta * (0.1 / sleep_delta)
+            print("Current state: ", current_state)
+            set_state(int(current_state))
         stop_moving()
         set_state(desired_state)
     
