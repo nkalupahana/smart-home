@@ -9,11 +9,11 @@ GPIO.output(3, GPIO.HIGH)
 while True:
     key = input("u - up, d - down, q - quit: ")
     if key == 'u':
-        GPIO.output(3, GPIO.LOW)
-        GPIO.output(2, GPIO.HIGH)
-    elif key == 'd':
         GPIO.output(3, GPIO.HIGH)
         GPIO.output(2, GPIO.LOW)
+    elif key == 'd':
+        GPIO.output(3, GPIO.LOW)
+        GPIO.output(2, GPIO.HIGH)
     elif key == 'q':
         break
 

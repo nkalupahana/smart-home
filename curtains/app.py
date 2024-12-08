@@ -51,11 +51,11 @@ def set_state(state):
 
 def start_moving(delta):
     if delta > 0:
-        GPIO.output(3, GPIO.LOW)
-        GPIO.output(2, GPIO.HIGH)
-    elif delta < 0:
         GPIO.output(3, GPIO.HIGH)
         GPIO.output(2, GPIO.LOW)
+    elif delta < 0:
+        GPIO.output(3, GPIO.LOW)
+        GPIO.output(2, GPIO.HIGH)
     else:
         return
     
@@ -63,12 +63,12 @@ def stop_moving():
     GPIO.output(2, GPIO.HIGH)
     GPIO.output(3, GPIO.HIGH)
 
-HOMEKIT_TO_TIME_MULTIPLIER = 0.2
+HOMEKIT_TO_TIME_MULTIPLIER = 0.35
 def calculate_sleep(delta):
     ret = abs(delta) * HOMEKIT_TO_TIME_MULTIPLIER
     # If we're going down, we need to sleep
     # a little less
     if delta < 0:
-        ret -= 0.25
+        ret -= 0.8
 
     return ret
