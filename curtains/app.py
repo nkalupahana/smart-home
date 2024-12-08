@@ -76,6 +76,6 @@ def calculate_sleep(delta):
     # If we're going down, we need to sleep
     # a little less
     if delta < 0:
-        ret -= 0.8
+        ret -= 1
 
     return ret
