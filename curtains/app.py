@@ -2,7 +2,7 @@ from enum import Enum
 from flask import Flask
 from time import sleep, time
 import json
-from threading import Lock
+from NamedAtomicLock import NamedAtomicLock
 import RPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
@@ -13,30 +13,33 @@ GPIO.output(2, GPIO.HIGH)
 GPIO.output(3, GPIO.HIGH)
 
 app = Flask(__name__)
-lock = Lock()
+lock = NamedAtomicLock("curtains")
 
 @app.route("/")
 def index():
     return "Curtains server up"
 
 # State from HomeKit is 0 - 100
+STATE_RANGE = 100
 @app.route("/set/<int:desired_state>")
 def move_curtains(desired_state):
-    with lock:
-        state = get_state()
-        delta = desired_state - state
-        start_moving(delta)
-        sleep_delta = calculate_sleep(delta)
-        end_time = time() + sleep_delta
-        current_state = state
-        while time() < end_time:
-            sleep(0.1)
-            current_state += delta * (0.1 / sleep_delta)
-            print("Current state: ", current_state)
-            set_state(int(current_state))
-        stop_moving()
-        set_state(desired_state)
-    
+    lock.acquire(60)
+
+    state = get_state()
+    delta = desired_state - state
+    start_moving(delta)
+    sleep_delta = calculate_sleep(delta)
+    end_time = time() + sleep_delta
+    current_state = state
+    while time() < end_time:
+        sleep(0.1)
+        current_state += delta * (0.1 / sleep_delta)
+        print("Current state: ", current_state)
+        set_state(int(current_state))
+    stop_moving()
+    set_state(desired_state)
+
+    lock.release()
     return "OK"
 
 @app.route("/status")
@@ -76,6 +79,6 @@ def calculate_sleep(delta):
     # If we're going down, we need to sleep
     # a little less
     if delta < 0:
-        ret -= 1
+        ret -= 1 * abs(delta / STATE_RANGE)
 
     return ret
