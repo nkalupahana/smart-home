@@ -1,0 +1,4 @@
+RPi.GPIO
+Flask
+gunicorn
+python-dotenv
